@@ -1,3 +1,4 @@
+import json
 from pprint import pprint
 from typing import Literal
 
@@ -22,10 +23,10 @@ class Asana:
                 print("----------------------------")
                 print(f"URL:              {resp.request.method} {resp.url}")
                 print(f"Status:           {resp.status_code} {resp.reason}")
-                print(f"Request headers:  {resp.request.headers}")
-                print(f"Response headers: {resp.headers}")
+                print(f"Request headers:  {json.dumps(dict(resp.request.headers))}")
+                print(f"Response headers: {json.dumps(dict(resp.headers))}")
                 print("----------------------------")
-                print("BODY:")
+                print("Response body:")
                 print(resp.text)
                 print("----------------------------")
 
@@ -54,6 +55,12 @@ class Asana:
 
     def get_team(self, *, team_id: str):
         return self._send_request(f"/teams/{team_id}/team_memberships")
+
+    def get_projects_by_team(self, *, team_id: str):
+        return self._send_request(f"/teams/{team_id}/projects")
+
+    def get_incomplete_tasks(self, *, project_id: str):
+        return self._send_request(f"/projects/{project_id}/tasks?limit=100&completed_since=now&opt_fields=assignee.name,memberships.section.name,name,assignee_name")
 
     def get_user_tasks(self, *, user_id: str):
         return self._send_request(f"/users/me/user_task_list?workspace={workspace}")

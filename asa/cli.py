@@ -2,8 +2,8 @@ import argparse
 import os
 import colorama
 
-from .config import config
-from .commands import who, workspaces, teams, team
+from .config import config, DEFAULT_TEAM, DEFAULT_BOARD
+from .commands import who, workspaces, teams, team, boards, board
 
 colorama.init()
 
@@ -15,13 +15,6 @@ def execute_cli():
     parser.add_argument("-v", "--verbose", action="store_true", default=False, help="Whether to print details of requests and responses")
 
     command_parser = parser.add_subparsers(title="commands")
-
-    #
-    # asa me
-    #
-    # me_parser = command_parser.add_parser("me", help="Get my tasks")
-    # me_parser.add_argument("-a", "--all", action="append", help="Include all tasks, including completed")
-    # me_parser.set_defaults(func=me)
 
     #
     # asa who
@@ -45,14 +38,26 @@ def execute_cli():
     teams_parser.add_argument("-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id")
     teams_parser.set_defaults(func=teams)
 
-
     #
     # asa team
     #
     team_parser = command_parser.add_parser("team", help="Get details for the specified team")
-    team_parser.add_argument("team", help="The team id")
+    team_parser.add_argument("-t", "--team", default=DEFAULT_TEAM, help="The team name from the asa configuration")
     team_parser.set_defaults(func=team)
 
+    #
+    # asa boards
+    #
+    boards_parser = command_parser.add_parser("boards", help="List the boards for the specified team")
+    boards_parser.add_argument("-t", "--team", default=DEFAULT_TEAM, help="The team name from the asa configuration")
+    boards_parser.set_defaults(func=boards)
+
+    #
+    # asa board
+    #
+    board_parser = command_parser.add_parser("board", help="Get the content for the specified board")
+    board_parser.add_argument("-b", "--board", default=DEFAULT_BOARD, help="The board name from the asa configuration")
+    board_parser.set_defaults(func=board)
 
     args = parser.parse_args()
 
