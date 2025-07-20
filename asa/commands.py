@@ -60,3 +60,20 @@ def teams(args):
     team_list = [[item["gid"], item["name"]] for item in data]
 
     _print_table(team_list, headers=["Id", "Name"])
+
+
+def team(args):
+    """
+    Get membership details for the specified team
+    """
+    asana = _new_asana_client(args)
+    data = asana.get_team(team_id=args.team)
+
+    member_list = [[item["user"]["gid"], item["user"]["name"]] for item in data]
+
+    if len(member_list) > 0:
+        _print_table([
+            [f"{Fore.CYAN}Name:{Fore.RESET} {data[0]["team"]["name"]}"],
+        ])
+
+        _print_table(member_list, headers=["Id", "Name"])

@@ -3,7 +3,7 @@ import os
 import colorama
 
 from .config import config
-from .commands import who, workspaces, teams
+from .commands import who, workspaces, teams, team
 
 colorama.init()
 
@@ -44,6 +44,15 @@ def execute_cli():
     teams_parser.add_argument("-u", "--user", default="me", help="The user id")
     teams_parser.add_argument("-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id")
     teams_parser.set_defaults(func=teams)
+
+
+    #
+    # asa team
+    #
+    team_parser = command_parser.add_parser("team", help="Get details for the specified team")
+    team_parser.add_argument("team", help="The team id")
+    team_parser.set_defaults(func=team)
+
 
     args = parser.parse_args()
 
