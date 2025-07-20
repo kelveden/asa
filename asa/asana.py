@@ -46,6 +46,12 @@ class Asana:
     def get_user(self, *, user_id: str):
         return self._send_request(f"/users/{user_id}")
 
+    def get_workspaces(self, *, user_id: str = "me"):
+        return self._send_request(f"/users/{user_id}/workspace_memberships")
+
+    def get_teams(self, *, workspace: str, user_id: str = "me"):
+        return self._send_request(f"/users/{user_id}/teams?workspace={workspace}")
+
     def get_user_tasks(self, *, user_id: str):
         return self._send_request(f"/users/me/user_task_list?workspace={workspace}")
 

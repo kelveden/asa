@@ -1,9 +1,9 @@
 import argparse
 import os
-
 import colorama
 
-from .commands import who
+from .config import config
+from .commands import who, workspaces, teams
 
 colorama.init()
 
@@ -26,9 +26,24 @@ def execute_cli():
     #
     # asa who
     #
-    who_parser = command_parser.add_parser("who", help="Identity the current user")
+    who_parser = command_parser.add_parser("who", help="Identity the specified current user")
+    who_parser.add_argument("-u", "--user", default="me", help="The user id")
     who_parser.set_defaults(func=who)
 
+    #
+    # asa workspaces
+    #
+    workspaces_parser = command_parser.add_parser("workspaces", help="List workspaces available to the user")
+    workspaces_parser.add_argument("-u", "--user", default="me", help="The user id")
+    workspaces_parser.set_defaults(func=workspaces)
+
+    #
+    # asa teams
+    #
+    teams_parser = command_parser.add_parser("teams", help="List the teams the user is on")
+    teams_parser.add_argument("-u", "--user", default="me", help="The user id")
+    teams_parser.add_argument("-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id")
+    teams_parser.set_defaults(func=teams)
 
     args = parser.parse_args()
 
