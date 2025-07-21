@@ -10,4 +10,4 @@ run +args:
     uv run python -m asa {{args}}
 
 install: build
-    pipx install "dist/asa-${VERSION}-py3-none-any.whl" --force
+    uv tool install "dist/asa-${VERSION}-py3-none-any.whl" --force

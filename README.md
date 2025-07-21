@@ -22,10 +22,6 @@ just init
 
 ## Installing the `asa` binary
 
-> **Prerequisites**
-> 
-> * [pipx](https://pipx.pypa.io/latest/) - Make sure [that it is configured to install binaries](https://github.com/pypa/pipx/blob/main/docs/installation.md#installation-options) to a location on your `PATH`.
-
 To install the app as a binary:
 
 ```sh
