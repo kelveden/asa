@@ -1,7 +1,6 @@
 import configparser
 import os
 from configparser import NoOptionError
-from curses.ascii import isdigit
 
 config = configparser.ConfigParser()
 config.read(os.path.expanduser("~/.config/asa/config.ini"))
@@ -15,6 +14,10 @@ try:
     DEFAULT_BOARD = config['defaults']['DefaultBoard']
 except NoOptionError:
     DEFAULT_BOARD = None
+
+#
+# Config getters
+#
 
 def _get_config_by_id(id: str, section_prefix: str):
     for s in config.sections():
@@ -32,6 +35,10 @@ def get_team_config(team_name_or_id: str):
         return next(_get_config_by_id(team_name_or_id, "team"), None)
     else:
         return config[f"team.{team_name_or_id}"]
+
+#
+# Id converters
+#
 
 def _to_id(name_or_id: str, config_getter):
     if config_ := config_getter(name_or_id):

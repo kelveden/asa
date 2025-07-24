@@ -1,4 +1,3 @@
-from pprint import pprint
 from typing import Sequence, Iterable
 
 from .asana import Asana
@@ -7,7 +6,7 @@ from tabulate import tabulate
 
 from term_image import image
 
-from .config import get_board_config, get_team_config, to_team_id
+from .config import get_board_config, to_team_id
 
 LINE_SEPARATOR = "--------------------------------------"
 
