@@ -6,6 +6,11 @@ config = configparser.ConfigParser()
 config.read(os.path.expanduser("~/.config/asa/config.ini"))
 
 try:
+    DEFAULT_WORKSPACE = config['defaults']['DefaultWorkspace']
+except NoOptionError:
+    DEFAULT_WORKSPACE = None
+
+try:
     DEFAULT_TEAM = config['defaults']['DefaultTeam']
 except NoOptionError:
     DEFAULT_TEAM = None

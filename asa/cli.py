@@ -3,7 +3,7 @@ import os
 import colorama
 
 from .config import config, DEFAULT_TEAM, DEFAULT_BOARD
-from .commands import who, workspaces, teams, team, boards, board
+from .commands import who, workspaces, teams, team, boards, board, me
 
 colorama.init()
 
@@ -22,6 +22,15 @@ def execute_cli():
     who_parser = command_parser.add_parser("who", help="Identity the specified current user")
     who_parser.add_argument("-u", "--user", default="me", help="The user id")
     who_parser.set_defaults(func=who)
+
+    #
+    # asa me
+    #
+    me_parser = command_parser.add_parser("me", help="Get incomplete tasks for the current user")
+    me_parser.add_argument("-u", "--user", default="me", help="The user id")
+    me_parser.add_argument("-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id")
+    me_parser.add_argument("-o", "--open", action="store_true", default=False, help="Open the board in the default browser")
+    me_parser.set_defaults(func=me)
 
     #
     # asa workspaces
@@ -57,6 +66,7 @@ def execute_cli():
     #
     board_parser = command_parser.add_parser("board", help="Get the content for the specified board")
     board_parser.add_argument("-b", "--board", default=DEFAULT_BOARD, help="The board name from the asa configuration")
+    board_parser.add_argument("-o", "--open", action="store_true", default=False, help="Open the board in the default browser")
     board_parser.set_defaults(func=board)
 
     args = parser.parse_args()

@@ -62,6 +62,6 @@ class Asana:
     def get_incomplete_tasks(self, *, project_id: str):
         return self._send_request(f"/projects/{project_id}/tasks?limit=100&completed_since=now&opt_fields=assignee.name,memberships.section.name,name,assignee_name")
 
-    def get_user_tasks(self, *, user_id: str):
-        return self._send_request(f"/users/me/user_task_list?workspace={workspace}")
+    def get_user_tasks(self, *, workspace: str, user_id: str = "me"):
+        return self._send_request(f"/users/{user_id}/user_task_list?workspace={workspace}")
 

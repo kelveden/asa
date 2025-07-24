@@ -1,3 +1,4 @@
+import webbrowser
 from typing import Sequence, Iterable
 
 from .asana import Asana
@@ -6,7 +7,7 @@ from tabulate import tabulate
 
 from term_image import image
 
-from .config import get_board_config, to_team_id
+from .config import get_board_config, to_team_id, DEFAULT_WORKSPACE
 
 LINE_SEPARATOR = "--------------------------------------"
 
@@ -23,9 +24,6 @@ def _print_table(iterable: Iterable[Iterable], headers: Sequence[str] = []):
 def who(args):
     """
     Prints basic details of the user currently being used for authentication to Asana.
-
-    :param args:
-        open: Whether to bypass CLI output and just open the user details page in the browser.
     """
     asana = _new_asana_client(args)
     data = asana.get_user(user_id=args.user)
@@ -36,6 +34,23 @@ def who(args):
     ])
 
     print(image.from_url(data['photo']['image_128x128'], width=30))
+
+def me(args):
+    """
+    Prints basic details of the tasks assigned to the current user
+
+    :param args:
+        open: Whether to bypass CLI output and just open the user details page in the browser.
+    """
+    asana = _new_asana_client(args)
+    data = asana.get_user_tasks(workspace=args.workspace, user_id=args.user)
+
+    if args.open:
+        webbrowser.open(f"https://app.asana.com/1/{args.workspace}/home", autoraise=True)
+    else:
+        print(data)
+
+    #_print_table(workspace_list, headers=["Id", "Name"])
 
 
 def workspaces(args):
@@ -104,19 +119,24 @@ def board(args):
     asana = _new_asana_client(args)
 
     board_config = get_board_config(args.board)
-    data = asana.get_incomplete_tasks(project_id=board_config["Id"])
 
-    columns = board_config["Columns"].split(",")
+    if args.open:
+        workspace = DEFAULT_WORKSPACE
+        webbrowser.open(f"https://app.asana.com/1/{workspace}/project/{board_config["Id"]}", autoraise=True)
+    else:
+        data = asana.get_incomplete_tasks(project_id=board_config["Id"])
 
-    def _print_task(task):
-        print(f"{task["name"]} - {task["assignee"]["name"] if task["assignee"] else "N/A"}")
+        columns = board_config.get("Columns", fallback="").split(",")
 
-    def _filter_tasks_by_column(column: str):
-        yield [t for t in data
-                if any(m["section"]["gid"] == column for m in t["memberships"])]
+        def _print_task(task):
+            print(f"{task["name"]} - {task["assignee"]["name"] if task["assignee"] else "N/A"}")
 
-    tasks_by_column = [_filter_tasks_by_column(column) for column in columns]
+        def _filter_tasks_by_column(column: str):
+            yield [t for t in data
+                    if any(m["section"]["gid"] == column for m in t["memberships"])]
 
-    for tbc in tasks_by_column:
-        print(LINE_SEPARATOR)
-        for t in next(tbc): _print_task(t)
+        tasks_by_column = [_filter_tasks_by_column(column) for column in columns] if len(columns) > 0 else data
+
+        for tbc in tasks_by_column:
+            print(LINE_SEPARATOR)
+            for t in next(tbc): _print_task(t)
