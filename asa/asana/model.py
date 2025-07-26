@@ -154,3 +154,5 @@ class Task(NamedRef):
 
     assignee: Optional[UserCompact]
     memberships: Iterable[ProjectMembership | SectionMembership]
+    projects: Iterable[ProjectCompact]
+    workspace: WorkspaceCompact

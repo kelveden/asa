@@ -10,7 +10,8 @@ from term_image import image  # type: ignore
 from .asana.model import NamedRef, Task, SectionCompact
 from .config import get_board_config, to_team_id, DEFAULT_WORKSPACE
 
-LINE_SEPARATOR = "--------------------------------------"
+LINE_SEPARATOR = "-"
+ASANA_APP_BASE = "https://app.asana.com/1"
 
 
 def _new_asana_client(args) -> AsanaClient:
@@ -32,14 +33,6 @@ def _print_named_refs(refs: Iterable[NamedRef]):
     _print_table([(ref.gid, ref.name) for ref in refs], headers=["Id", "Name"])
 
 
-def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ()):
-    for section, tasks in _group_tasks_by_section(tasks).items():
-        if (len(section_id_allowlist) == 0) or (section.gid in section_id_allowlist):
-            print(f"---- {section.name} ----")
-            for task in tasks:
-                print(f"{task.name} [{task.assignee.name if task.assignee else 'N/A'}]")
-
-
 def _group_tasks_by_section(tasks: Iterable[Task]) -> Dict[SectionCompact, List[Task]]:
     accumulated: Dict[SectionCompact, List[Task]] = {}
 
@@ -52,6 +45,23 @@ def _group_tasks_by_section(tasks: Iterable[Task]) -> Dict[SectionCompact, List[
                 accumulated[section] = [task]
 
     return accumulated
+
+
+def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ()):
+    def _task_link(task_: Task):
+        # See https://stackoverflow.com/a/71309268
+        # OSC 8 ; params ; URI ST <name> OSC 8 ;; ST
+        escape_mask = "\033]8;;{}\033\\{}\033]8;;\033\\"
+
+        uri = f"{ASANA_APP_BASE}{task.workspace.gid}/project/{next(iter(task.projects)).gid}/task/{task.gid}"
+
+        return escape_mask.format(uri, task_.name)
+
+    for section, tasks in _group_tasks_by_section(tasks).items():
+        if (len(section_id_allowlist) == 0) or (section.gid in section_id_allowlist):
+            print(f"---- {section.name} ----")
+            for task in tasks:
+                print(f"{_task_link(task)} [{task.assignee.name if task.assignee else 'N/A'}]")
 
 
 def who(args):
