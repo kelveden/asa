@@ -9,7 +9,7 @@ Opinionated CLI for [Asana](https://asana.com/).
 > * [just](https://just.systems/man/en/) - task runner.
 > * [uv](https://docs.astral.sh/uv/) - Python package/project manager.
 
-1. Install the dependencies:
+1. Install the dependencies and pre-commit hook:
 
 ```sh
 just init
