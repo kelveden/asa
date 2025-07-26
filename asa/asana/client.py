@@ -16,7 +16,7 @@ from asa.asana.model import (
 )
 
 ASANA_API_BASE = "https://app.asana.com/api/1.0"
-TASKS_QUERY_STRING = "?limit=100&completed_since=now&opt_fields=assignee.name,memberships.section.name,name,assignee_name,projects,workspace,workspace.name,projects.name"
+TASKS_QUERY_STRING = "?limit=100&completed_since=now&opt_fields=assignee.name,memberships.section.name,name,assignee_name,projects,workspace,workspace.name,projects.name,permalink_url"
 
 
 class AsanaClient:

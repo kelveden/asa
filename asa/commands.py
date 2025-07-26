@@ -13,7 +13,6 @@ from .config import get_board_config, to_team_id, DEFAULT_WORKSPACE
 
 LINE_SEPARATOR = "-"
 SECTION_SEPARATOR_LENGTH = 60
-ASANA_APP_BASE = "https://app.asana.com/1"
 
 
 def _new_asana_client(args) -> AsanaClient:
@@ -55,9 +54,7 @@ def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ())
         # OSC 8 ; params ; URI ST <name> OSC 8 ;; ST
         escape_mask = "\033]8;;{}\033\\{}\033]8;;\033\\"
 
-        uri = f"{ASANA_APP_BASE}{task.workspace.gid}/project/{next(iter(task.projects)).gid}/task/{task.gid}"
-
-        return escape_mask.format(uri, task_.name)
+        return escape_mask.format(task.permalink_url, task_.name)
 
     def _print_section_header(section_name: str):
         padding_length = (SECTION_SEPARATOR_LENGTH - len(section_name) - 2) / 2

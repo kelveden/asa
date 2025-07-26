@@ -156,3 +156,4 @@ class Task(NamedRef):
     memberships: Iterable[ProjectMembership | SectionMembership]
     projects: Iterable[ProjectCompact]
     workspace: WorkspaceCompact
+    permalink_url: str
