@@ -1,4 +1,5 @@
 import webbrowser
+from math import floor, ceil
 from typing import Sequence, Iterable, List, Dict
 
 from asa.asana.client import AsanaClient
@@ -11,6 +12,7 @@ from .asana.model import NamedRef, Task, SectionCompact
 from .config import get_board_config, to_team_id, DEFAULT_WORKSPACE
 
 LINE_SEPARATOR = "-"
+SECTION_SEPARATOR_LENGTH = 60
 ASANA_APP_BASE = "https://app.asana.com/1"
 
 
@@ -57,9 +59,15 @@ def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ())
 
         return escape_mask.format(uri, task_.name)
 
+    def _print_section_header(section_name: str):
+        padding_length = (SECTION_SEPARATOR_LENGTH - len(section_name) - 2) / 2
+        print(
+            f"{LINE_SEPARATOR * floor(padding_length)} {section_name} {LINE_SEPARATOR * ceil(padding_length)}"
+        )
+
     for section, tasks in _group_tasks_by_section(tasks).items():
         if (len(section_id_allowlist) == 0) or (section.gid in section_id_allowlist):
-            print(f"---- {section.name} ----")
+            _print_section_header(section.name)
             for task in tasks:
                 print(f"{_task_link(task)} [{task.assignee.name if task.assignee else 'N/A'}]")
 
