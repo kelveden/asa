@@ -5,10 +5,17 @@ import requests
 from requests import Session, Response
 from requests.auth import AuthBase
 
-from asa.asana.model import User, WorkspaceMembership, TeamCompact, TeamMembership, TaskCompact, ProjectCompact, TaskList
+from asa.asana.model import (
+    User,
+    WorkspaceMembership,
+    TeamCompact,
+    TeamMembership,
+    TaskCompact,
+    ProjectCompact,
+    TaskList,
+)
 
-ASANA_API_BASE="https://app.asana.com/api/1.0"
-
+ASANA_API_BASE = "https://app.asana.com/api/1.0"
 
 
 class AsanaClient:
@@ -17,7 +24,7 @@ class AsanaClient:
             self.token = token
 
         def __call__(self, r):
-            r.headers['Authorization'] = f"Bearer {self.token}"
+            r.headers["Authorization"] = f"Bearer {self.token}"
             return r
 
     def _send_request(self, url: str, method: str = "get"):
@@ -33,10 +40,12 @@ class AsanaClient:
                 print(resp_.text)
                 print("----------------------------")
 
-        req = requests.Request(method,
-                               f"{ASANA_API_BASE}{url}",
-                               auth=self.AsanaAuth(self.token),
-                               hooks={"response": _response_hook}).prepare()
+        req = requests.Request(
+            method,
+            f"{ASANA_API_BASE}{url}",
+            auth=self.AsanaAuth(self.token),
+            hooks={"response": _response_hook},
+        ).prepare()
 
         resp = Session().send(req)
         resp.raise_for_status()
@@ -68,10 +77,11 @@ class AsanaClient:
         return [ProjectCompact.model_validate(p) for p in data]
 
     def get_project_incomplete_tasks(self, *, project_id: str) -> List[TaskCompact]:
-        data = self._send_request(f"/projects/{project_id}/tasks?limit=100&completed_since=now&opt_fields=assignee.name,memberships.section.name,name,assignee_name")
+        data = self._send_request(
+            f"/projects/{project_id}/tasks?limit=100&completed_since=now&opt_fields=assignee.name,memberships.section.name,name,assignee_name"
+        )
         return [TaskCompact.model_validate(t) for t in data]
 
     def get_user_tasks(self, *, workspace: str, user_id: str = "me") -> TaskList:
         data = self._send_request(f"/users/{user_id}/user_task_list?workspace={workspace}")
         return TaskList.model_validate(data)
-

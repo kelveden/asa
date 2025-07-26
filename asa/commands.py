@@ -12,14 +12,21 @@ from .config import get_board_config, to_team_id, DEFAULT_WORKSPACE
 
 LINE_SEPARATOR = "--------------------------------------"
 
+
 def _new_asana_client(args) -> AsanaClient:
     return AsanaClient(args.token, args.verbose)
 
+
 def _print_table(rows: Iterable[Iterable], headers: Sequence[str] = ()):
-    print(tabulate(rows,
-                   headers=[f"{Fore.CYAN}{h}{Fore.RESET}" for h in headers],
-                   tablefmt="heavy_grid",
-                   numalign="left"))
+    print(
+        tabulate(
+            rows,
+            headers=[f"{Fore.CYAN}{h}{Fore.RESET}" for h in headers],
+            tablefmt="heavy_grid",
+            numalign="left",
+        )
+    )
+
 
 def _print_named_refs(refs: Iterable[NamedRef]):
     _print_table([(ref.gid, ref.name) for ref in refs], headers=["Id", "Name"])
@@ -32,12 +39,15 @@ def who(args):
     asana = _new_asana_client(args)
     user = asana.get_user(user_id=args.user)
 
-    _print_table([
-        [f"{Fore.CYAN}Name:{Fore.RESET} {user.name}"],
-        [f"{Fore.CYAN}Id:{Fore.RESET}   {user.gid}"]
-    ])
+    _print_table(
+        [
+            [f"{Fore.CYAN}Name:{Fore.RESET} {user.name}"],
+            [f"{Fore.CYAN}Id:{Fore.RESET}   {user.gid}"],
+        ]
+    )
 
     print(image.from_url(user.photo.image_128x128, width=30))
+
 
 def me(args):
     """
@@ -54,7 +64,7 @@ def me(args):
     else:
         print(task_list)
 
-    #_print_table(workspace_list, headers=["Id", "Name"])
+    # _print_table(workspace_list, headers=["Id", "Name"])
 
 
 def workspaces(args):
@@ -89,6 +99,7 @@ def team(args):
 
     _print_named_refs([tm.user for tm in team_memberships])
 
+
 def boards(args):
     """
     List the boards belonging to the specified team
@@ -111,20 +122,27 @@ def board(args):
 
     if args.open:
         workspace = DEFAULT_WORKSPACE
-        webbrowser.open(f"https://app.asana.com/1/{workspace}/project/{board_config["Id"]}", autoraise=True)
+        webbrowser.open(
+            f"https://app.asana.com/1/{workspace}/project/{board_config['Id']}", autoraise=True
+        )
     else:
         data = asana.get_project_incomplete_tasks(project_id=board_config["Id"])
 
         columns = board_config.get("Columns", fallback="").split(",")
 
         def _print_task(task):
-            print(f"{task["name"]} - {task["assignee"]["name"] if task["assignee"] else "N/A"}")
+            print(f"{task['name']} - {task['assignee']['name'] if task['assignee'] else 'N/A'}")
 
         def _filter_tasks_by_column(column: str):
-            yield [task for task in data
-                    if any(m["section"]["gid"] == column for m in task["memberships"])]
+            yield [
+                task
+                for task in data
+                if any(m["section"]["gid"] == column for m in task["memberships"])
+            ]
 
-        tasks_by_column = [_filter_tasks_by_column(column) for column in columns] if len(columns) > 0 else data
+        tasks_by_column = (
+            [_filter_tasks_by_column(column) for column in columns] if len(columns) > 0 else data
+        )
 
         for tbc in tasks_by_column:
             print(LINE_SEPARATOR)

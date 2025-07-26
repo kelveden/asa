@@ -11,8 +11,16 @@ colorama.init()
 def execute_cli():
     # Parse command line
     parser = argparse.ArgumentParser()
-    parser.add_argument("--token", default=os.environ.get('ASANA_TOKEN'), help="Asana personal access token")
-    parser.add_argument("-v", "--verbose", action="store_true", default=False, help="Whether to print details of requests and responses")
+    parser.add_argument(
+        "--token", default=os.environ.get("ASANA_TOKEN"), help="Asana personal access token"
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        default=False,
+        help="Whether to print details of requests and responses",
+    )
 
     command_parser = parser.add_subparsers(title="commands")
 
@@ -28,14 +36,24 @@ def execute_cli():
     #
     me_parser = command_parser.add_parser("me", help="Get incomplete tasks for the current user")
     me_parser.add_argument("-u", "--user", default="me", help="The user id")
-    me_parser.add_argument("-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id")
-    me_parser.add_argument("-o", "--open", action="store_true", default=False, help="Open the board in the default browser")
+    me_parser.add_argument(
+        "-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id"
+    )
+    me_parser.add_argument(
+        "-o",
+        "--open",
+        action="store_true",
+        default=False,
+        help="Open the board in the default browser",
+    )
     me_parser.set_defaults(func=me)
 
     #
     # asa workspaces
     #
-    workspaces_parser = command_parser.add_parser("workspaces", help="List workspaces available to the user")
+    workspaces_parser = command_parser.add_parser(
+        "workspaces", help="List workspaces available to the user"
+    )
     workspaces_parser.add_argument("-u", "--user", default="me", help="The user id")
     workspaces_parser.set_defaults(func=workspaces)
 
@@ -44,29 +62,47 @@ def execute_cli():
     #
     teams_parser = command_parser.add_parser("teams", help="List the teams the user is on")
     teams_parser.add_argument("-u", "--user", default="me", help="The user id")
-    teams_parser.add_argument("-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id")
+    teams_parser.add_argument(
+        "-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id"
+    )
     teams_parser.set_defaults(func=teams)
 
     #
     # asa team
     #
     team_parser = command_parser.add_parser("team", help="Get details for the specified team")
-    team_parser.add_argument("-t", "--team", default=DEFAULT_TEAM, help="The team name from the asa configuration")
+    team_parser.add_argument(
+        "-t", "--team", default=DEFAULT_TEAM, help="The team name from the asa configuration"
+    )
     team_parser.set_defaults(func=team)
 
     #
     # asa boards
     #
-    boards_parser = command_parser.add_parser("boards", help="List the boards for the specified team")
-    boards_parser.add_argument("-t", "--team", default=DEFAULT_TEAM, help="The team name from the asa configuration")
+    boards_parser = command_parser.add_parser(
+        "boards", help="List the boards for the specified team"
+    )
+    boards_parser.add_argument(
+        "-t", "--team", default=DEFAULT_TEAM, help="The team name from the asa configuration"
+    )
     boards_parser.set_defaults(func=boards)
 
     #
     # asa board
     #
-    board_parser = command_parser.add_parser("board", help="Get the content for the specified board")
-    board_parser.add_argument("-b", "--board", default=DEFAULT_BOARD, help="The board name from the asa configuration")
-    board_parser.add_argument("-o", "--open", action="store_true", default=False, help="Open the board in the default browser")
+    board_parser = command_parser.add_parser(
+        "board", help="Get the content for the specified board"
+    )
+    board_parser.add_argument(
+        "-b", "--board", default=DEFAULT_BOARD, help="The board name from the asa configuration"
+    )
+    board_parser.add_argument(
+        "-o",
+        "--open",
+        action="store_true",
+        default=False,
+        help="Open the board in the default browser",
+    )
     board_parser.set_defaults(func=board)
 
     args = parser.parse_args()
@@ -74,7 +110,7 @@ def execute_cli():
     #
     # Execute command
     #
-    if hasattr(args, 'func'):
+    if hasattr(args, "func"):
         args.func(args)
     else:
         parser.print_help()

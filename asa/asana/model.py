@@ -3,12 +3,15 @@ from pydantic import BaseModel
 # Identifier used in the Asana API to identify each resource
 type Gid = str
 
+
 class NamedRef(BaseModel):
     """
     Base class for all resources that include an identifier (gid) and name.
     """
+
     gid: Gid
     name: str
+
 
 class Photo(BaseModel):
     """
@@ -16,11 +19,13 @@ class Photo(BaseModel):
 
     See: https://developers.asana.com/reference/getuser
     """
+
     image_21x21: str
     image_27x27: str
     image_36x36: str
     image_60x60: str
     image_128x128: str
+
 
 class UserCompact(NamedRef):
     """
@@ -28,7 +33,9 @@ class UserCompact(NamedRef):
 
     See: https://developers.asana.com/reference/users#usercompact
     """
+
     pass
+
 
 class User(UserCompact):
     """
@@ -36,8 +43,10 @@ class User(UserCompact):
 
     See: https://developers.asana.com/reference/users
     """
+
     email: str
     photo: Photo
+
 
 class WorkspaceCompact(NamedRef):
     """
@@ -45,7 +54,9 @@ class WorkspaceCompact(NamedRef):
 
     See: https://developers.asana.com/reference/workspaces#workspacecompact
     """
+
     pass
+
 
 class WorkspaceMembership(BaseModel):
     """
@@ -53,9 +64,11 @@ class WorkspaceMembership(BaseModel):
 
     See: https://developers.asana.com/reference/workspace-memberships
     """
+
     gid: Gid
     user: UserCompact
     workspace: WorkspaceCompact
+
 
 class TeamCompact(NamedRef):
     """
@@ -63,7 +76,9 @@ class TeamCompact(NamedRef):
 
     See: https://developers.asana.com/reference/teams#teamcompact
     """
+
     pass
+
 
 class TeamMembership(BaseModel):
     """
@@ -71,9 +86,11 @@ class TeamMembership(BaseModel):
 
     See: https://developers.asana.com/reference/team-memberships
     """
+
     gid: Gid
     user: UserCompact
     team: TeamCompact
+
 
 class ProjectCompact(NamedRef):
     """
@@ -81,7 +98,9 @@ class ProjectCompact(NamedRef):
 
     See: https://developers.asana.com/reference/projects#projectcompact
     """
+
     pass
+
 
 class TaskCompact(NamedRef):
     """
@@ -89,7 +108,9 @@ class TaskCompact(NamedRef):
 
     See: https://developers.asana.com/reference/tasks#taskcompact
     """
+
     pass
+
 
 class TaskList(NamedRef):
     """
@@ -97,5 +118,6 @@ class TaskList(NamedRef):
 
     See: https://developers.asana.com/reference/user-task-lists
     """
+
     owner: UserCompact
     workspace: WorkspaceCompact
