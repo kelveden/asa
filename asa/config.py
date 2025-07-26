@@ -6,17 +6,17 @@ config = configparser.ConfigParser()
 config.read(os.path.expanduser("~/.config/asa/config.ini"))
 
 try:
-    DEFAULT_WORKSPACE = config['defaults']['DefaultWorkspace']
+    DEFAULT_WORKSPACE: str | None = config['defaults']['DefaultWorkspace']
 except NoOptionError:
     DEFAULT_WORKSPACE = None
 
 try:
-    DEFAULT_TEAM = config['defaults']['DefaultTeam']
+    DEFAULT_TEAM: str | None = config['defaults']['DefaultTeam']
 except NoOptionError:
     DEFAULT_TEAM = None
 
 try:
-    DEFAULT_BOARD = config['defaults']['DefaultBoard']
+    DEFAULT_BOARD: str | None = config['defaults']['DefaultBoard']
 except NoOptionError:
     DEFAULT_BOARD = None
 
@@ -24,9 +24,9 @@ except NoOptionError:
 # Config getters
 #
 
-def _get_config_by_id(id: str, section_prefix: str):
+def _get_config_by_id(id_: str, section_prefix: str):
     for s in config.sections():
-        if s.startswith(f"{section_prefix}.") and config[s]["Id"] == id:
+        if s.startswith(f"{section_prefix}.") and config[s]["Id"] == id_:
             yield config[s]
 
 def get_board_config(board_name_or_id: str):

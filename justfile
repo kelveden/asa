@@ -4,6 +4,8 @@ init:
     uv sync
 
 build:
+    uv run ruff check
+    uv run mypy .
     uv build
 
 run +args:
