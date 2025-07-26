@@ -1,5 +1,5 @@
 import webbrowser
-from typing import Sequence, Iterable
+from typing import Sequence, Iterable, List, Dict
 
 from asa.asana.client import AsanaClient
 from colorama import Fore
@@ -7,7 +7,7 @@ from tabulate import tabulate
 
 from term_image import image  # type: ignore
 
-from .asana.model import NamedRef
+from .asana.model import NamedRef, Task, SectionCompact
 from .config import get_board_config, to_team_id, DEFAULT_WORKSPACE
 
 LINE_SEPARATOR = "--------------------------------------"
@@ -30,6 +30,28 @@ def _print_table(rows: Iterable[Iterable], headers: Sequence[str] = ()):
 
 def _print_named_refs(refs: Iterable[NamedRef]):
     _print_table([(ref.gid, ref.name) for ref in refs], headers=["Id", "Name"])
+
+
+def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ()):
+    for section, tasks in _group_tasks_by_section(tasks).items():
+        if (len(section_id_allowlist) == 0) or (section.gid in section_id_allowlist):
+            print(f"---- {section.name} ----")
+            for task in tasks:
+                print(f"{task.name} [{task.assignee.name if task.assignee else 'N/A'}]")
+
+
+def _group_tasks_by_section(tasks: Iterable[Task]) -> Dict[SectionCompact, List[Task]]:
+    accumulated: Dict[SectionCompact, List[Task]] = {}
+
+    for task in tasks:
+        sections = [tm.section for tm in task.memberships if isinstance(tm, Task.SectionMembership)]  # type: ignore
+        for section in sections:
+            if section in accumulated:
+                accumulated[section].append(task)
+            else:
+                accumulated[section] = [task]
+
+    return accumulated
 
 
 def who(args):
@@ -57,14 +79,15 @@ def me(args):
         open: Whether to bypass CLI output and just open the user details page in the browser.
     """
     asana = _new_asana_client(args)
-    task_list = asana.get_user_tasks(workspace=args.workspace, user_id=args.user)
+    task_list = asana.get_user_task_list(workspace=args.workspace, user_id=args.user)
 
     if args.open:
         webbrowser.open(f"https://app.asana.com/1/{args.workspace}/home", autoraise=True)
     else:
-        print(task_list)
+        task_list_id = task_list.gid
+        tasks = asana.get_user_incomplete_tasks(task_list_id=task_list_id)
 
-    # _print_table(workspace_list, headers=["Id", "Name"])
+        _print_tasks(tasks)
 
 
 def workspaces(args):
@@ -126,25 +149,7 @@ def board(args):
             f"https://app.asana.com/1/{workspace}/project/{board_config['Id']}", autoraise=True
         )
     else:
-        data = asana.get_project_incomplete_tasks(project_id=board_config["Id"])
-
+        tasks = asana.get_project_incomplete_tasks(project_id=board_config["Id"])
         columns = board_config.get("Columns", fallback="").split(",")
 
-        def _print_task(task):
-            print(f"{task['name']} - {task['assignee']['name'] if task['assignee'] else 'N/A'}")
-
-        def _filter_tasks_by_column(column: str):
-            yield [
-                task
-                for task in data
-                if any(m["section"]["gid"] == column for m in task["memberships"])
-            ]
-
-        tasks_by_column = (
-            [_filter_tasks_by_column(column) for column in columns] if len(columns) > 0 else data
-        )
-
-        for tbc in tasks_by_column:
-            print(LINE_SEPARATOR)
-            for t in next(tbc):
-                _print_task(t)
+        _print_tasks(tasks, section_id_allowlist=columns)

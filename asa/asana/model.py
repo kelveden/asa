@@ -1,4 +1,12 @@
-from pydantic import BaseModel
+from typing import Iterable, Optional
+
+from pydantic import BaseModel as PydanticBaseModel
+
+
+class BaseModel(PydanticBaseModel):
+    class Config:
+        frozen = True
+
 
 # Identifier used in the Asana API to identify each resource
 type Gid = str
@@ -121,3 +129,28 @@ class TaskList(NamedRef):
 
     owner: UserCompact
     workspace: WorkspaceCompact
+
+
+class SectionCompact(NamedRef):
+    """
+    The compact details for a named section
+    """
+
+    pass
+
+
+class Task(NamedRef):
+    """
+    The details for a task.
+
+    See: https://developers.asana.com/reference/tasks
+    """
+
+    class ProjectMembership(BaseModel):
+        project: ProjectCompact
+
+    class SectionMembership(BaseModel):
+        section: SectionCompact
+
+    assignee: Optional[UserCompact]
+    memberships: Iterable[ProjectMembership | SectionMembership]

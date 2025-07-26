@@ -10,12 +10,13 @@ from asa.asana.model import (
     WorkspaceMembership,
     TeamCompact,
     TeamMembership,
-    TaskCompact,
     ProjectCompact,
     TaskList,
+    Task,
 )
 
 ASANA_API_BASE = "https://app.asana.com/api/1.0"
+TASKS_QUERY_STRING = "?limit=100&completed_since=now&opt_fields=assignee.name,memberships.section.name,name,assignee_name"
 
 
 class AsanaClient:
@@ -28,7 +29,7 @@ class AsanaClient:
             return r
 
     def _send_request(self, url: str, method: str = "get"):
-        def _response_hook(resp_: Response):
+        def _response_hook(resp_: Response, *args, **kwargs):
             if self.verbose:
                 print("----------------------------")
                 print(f"URL:              {resp_.request.method} {resp_.url}")
@@ -76,12 +77,14 @@ class AsanaClient:
         data = self._send_request(f"/teams/{team_id}/projects")
         return [ProjectCompact.model_validate(p) for p in data]
 
-    def get_project_incomplete_tasks(self, *, project_id: str) -> List[TaskCompact]:
-        data = self._send_request(
-            f"/projects/{project_id}/tasks?limit=100&completed_since=now&opt_fields=assignee.name,memberships.section.name,name,assignee_name"
-        )
-        return [TaskCompact.model_validate(t) for t in data]
+    def get_project_incomplete_tasks(self, *, project_id: str) -> List[Task]:
+        data = self._send_request(f"/projects/{project_id}/tasks{TASKS_QUERY_STRING}")
+        return [Task.model_validate(t) for t in data]
 
-    def get_user_tasks(self, *, workspace: str, user_id: str = "me") -> TaskList:
+    def get_user_task_list(self, *, workspace: str, user_id: str = "me") -> TaskList:
         data = self._send_request(f"/users/{user_id}/user_task_list?workspace={workspace}")
         return TaskList.model_validate(data)
+
+    def get_user_incomplete_tasks(self, *, task_list_id: str) -> List[Task]:
+        data = self._send_request(f"/user_task_lists/{task_list_id}/tasks{TASKS_QUERY_STRING}")
+        return [Task.model_validate(t) for t in data]

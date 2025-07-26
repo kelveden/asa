@@ -15,5 +15,8 @@ build: check
 install: build
     uv tool install "dist/asa-${VERSION}-py3-none-any.whl" --force
 
+format:
+    uv run ruff format
+
 run +args:
     uv run python -m asa {{args}}
