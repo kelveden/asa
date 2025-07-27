@@ -2,8 +2,8 @@ import argparse
 import os
 import colorama
 
-from .config import config, DEFAULT_TEAM, DEFAULT_BOARD
-from .commands import who, workspaces, teams, team, boards, board, me
+from .config import CONFIG_FILE_PATH, get_workspace, get_default_team, get_default_board
+from .commands import who, workspaces, teams, team, boards, board, me, init
 
 colorama.init()
 
@@ -36,9 +36,7 @@ def execute_cli():
     #
     me_parser = command_parser.add_parser("me", help="Get incomplete tasks for the current user")
     me_parser.add_argument("-u", "--user", default="me", help="The user id")
-    me_parser.add_argument(
-        "-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id"
-    )
+    me_parser.add_argument("-w", "--workspace", default=get_workspace(), help="The workspace id")
     me_parser.add_argument(
         "-o",
         "--open",
@@ -62,9 +60,7 @@ def execute_cli():
     #
     teams_parser = command_parser.add_parser("teams", help="List the teams the user is on")
     teams_parser.add_argument("-u", "--user", default="me", help="The user id")
-    teams_parser.add_argument(
-        "-w", "--workspace", default=config["defaults"]["DefaultWorkspace"], help="The workspace id"
-    )
+    teams_parser.add_argument("-w", "--workspace", default=get_workspace(), help="The workspace id")
     teams_parser.set_defaults(func=teams)
 
     #
@@ -72,7 +68,10 @@ def execute_cli():
     #
     team_parser = command_parser.add_parser("team", help="Get details for the specified team")
     team_parser.add_argument(
-        "-t", "--team", default=DEFAULT_TEAM, help="The team name from the asa configuration"
+        "-t",
+        "--team",
+        default=get_default_team(),
+        help="The team identifier from the asa configuration",
     )
     team_parser.set_defaults(func=team)
 
@@ -83,7 +82,10 @@ def execute_cli():
         "boards", help="List the boards for the specified team"
     )
     boards_parser.add_argument(
-        "-t", "--team", default=DEFAULT_TEAM, help="The team name from the asa configuration"
+        "-t",
+        "--team",
+        default=get_default_team(),
+        help="The team identifier from the asa configuration",
     )
     boards_parser.set_defaults(func=boards)
 
@@ -94,7 +96,10 @@ def execute_cli():
         "board", help="Get the content for the specified board"
     )
     board_parser.add_argument(
-        "-b", "--board", default=DEFAULT_BOARD, help="The board name from the asa configuration"
+        "-b",
+        "--board",
+        default=get_default_board(),
+        help="The board identifier from the asa configuration",
     )
     board_parser.add_argument(
         "-o",
@@ -104,6 +109,20 @@ def execute_cli():
         help="Open the board in the default browser",
     )
     board_parser.set_defaults(func=board)
+
+    #
+    # asa init
+    #
+    init_parser = command_parser.add_parser(
+        "init", help="Initialise the configuration for asa via a interactive wizard"
+    )
+    init_parser.add_argument(
+        "-c",
+        "--config-file",
+        default=CONFIG_FILE_PATH,
+        help="The path to the config file to create",
+    )
+    init_parser.set_defaults(func=init)
 
     args = parser.parse_args()
 

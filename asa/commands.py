@@ -1,3 +1,4 @@
+import os
 import webbrowser
 from math import floor, ceil
 from typing import Sequence, Iterable, List, Dict
@@ -9,7 +10,7 @@ from tabulate import tabulate
 from term_image import image  # type: ignore
 
 from .asana.model import NamedRef, Task, SectionCompact
-from .config import get_board_config, to_team_id, DEFAULT_WORKSPACE
+from .config import get_board_config, to_team_id, get_workspace, initialise_config
 
 LINE_SEPARATOR = "-"
 SECTION_SEPARATOR_LENGTH = 60
@@ -159,12 +160,22 @@ def board(args):
     board_config = get_board_config(args.board)
 
     if args.open:
-        workspace = DEFAULT_WORKSPACE
+        workspace = get_workspace()
         webbrowser.open(
             f"https://app.asana.com/1/{workspace}/project/{board_config['Id']}", autoraise=True
         )
     else:
         tasks = asana.get_project_incomplete_tasks(project_id=board_config["Id"])
-        columns = board_config.get("Columns", fallback="").split(",")
+        columns_str = board_config.get("Columns", fallback=None)
+        columns = columns_str.split(",") if columns_str else []
 
         _print_tasks(tasks, section_id_allowlist=columns)
+
+
+def init(args) -> None:
+    """
+    Creates a asa config file based on the choices selected via wizard.
+    """
+    asana = _new_asana_client(args)
+
+    initialise_config(asana=asana, config_file_path=os.path.expanduser(args.config_file))

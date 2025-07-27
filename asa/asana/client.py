@@ -13,6 +13,7 @@ from asa.asana.model import (
     ProjectCompact,
     TaskList,
     Task,
+    SectionCompact,
 )
 
 ASANA_API_BASE = "https://app.asana.com/api/1.0"
@@ -88,3 +89,7 @@ class AsanaClient:
     def get_user_incomplete_tasks(self, *, task_list_id: str) -> List[Task]:
         data = self._send_request(f"/user_task_lists/{task_list_id}/tasks{TASKS_QUERY_STRING}")
         return [Task.model_validate(t) for t in data]
+
+    def get_sections_by_project(self, *, project_id: str) -> List[SectionCompact]:
+        data = self._send_request(f"/projects/{project_id}/sections")
+        return [SectionCompact.model_validate(s) for s in data]
