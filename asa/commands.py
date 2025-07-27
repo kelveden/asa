@@ -208,12 +208,15 @@ def manage_config(args) -> None:
     Manage the asa configuration file.
     """
     asana = _new_asana_client(args)
+    config_file_path = os.path.expanduser(CONFIG_FILE_PATH)
 
     if args.init:
         print(f"==> Preparing configuration to write to {CONFIG_FILE_PATH}...")
-        initialise_config(asana=asana, config_file_path=os.path.expanduser(CONFIG_FILE_PATH))
+        initialise_config(asana=asana, config_file_path=config_file_path)
 
     reload_config()
+
+    print(f"==> Generated from the config file {config_file_path}")
 
     default_board = get_default_board()
     default_team = get_default_team()
