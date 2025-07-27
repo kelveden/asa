@@ -2,8 +2,8 @@ import argparse
 import os
 import colorama
 
-from .config import CONFIG_FILE_PATH, get_workspace, get_default_team, get_default_board
-from .commands import who, workspaces, teams, team, boards, board, me, init
+from .config import get_workspace, get_default_team, get_default_board
+from .commands import who, workspaces, teams, team, boards, board, me, manage_config
 
 colorama.init()
 
@@ -111,18 +111,17 @@ def execute_cli():
     board_parser.set_defaults(func=board)
 
     #
-    # asa init
+    # asa config
     #
-    init_parser = command_parser.add_parser(
-        "init", help="Initialise the configuration for asa via a interactive wizard"
+    config_parser = command_parser.add_parser("config", help="Manage the asa configuration")
+
+    config_parser.add_argument(
+        "--init",
+        action="store_true",
+        default=False,
+        help="Initialise a new configuration file",
     )
-    init_parser.add_argument(
-        "-c",
-        "--config-file",
-        default=CONFIG_FILE_PATH,
-        help="The path to the config file to create",
-    )
-    init_parser.set_defaults(func=init)
+    config_parser.set_defaults(func=manage_config)
 
     args = parser.parse_args()
 

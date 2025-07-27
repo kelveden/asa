@@ -1,4 +1,5 @@
 import os
+import re
 import webbrowser
 from math import floor, ceil
 from typing import Sequence, Iterable, List, Dict
@@ -10,7 +11,18 @@ from tabulate import tabulate
 from term_image import image  # type: ignore
 
 from .asana.model import NamedRef, Task, SectionCompact
-from .config import get_board_config, to_team_id, get_workspace, initialise_config
+from .config import (
+    get_board_config,
+    to_team_id,
+    get_workspace,
+    initialise_config,
+    get_default_board,
+    get_default_team,
+    get_all_boards,
+    get_all_teams,
+    CONFIG_FILE_PATH,
+    reload_config,
+)
 
 LINE_SEPARATOR = "-"
 SECTION_SEPARATOR_LENGTH = 60
@@ -63,11 +75,19 @@ def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ())
             f"{LINE_SEPARATOR * floor(padding_length)} {section_name} {LINE_SEPARATOR * ceil(padding_length)}"
         )
 
+    def _to_initials(name: str):
+        return re.sub("[a-z ]", "", name)
+
+    def _print_task(task_: Task):
+        print(
+            f"{_task_link(task)} [{_to_initials(task.assignee.name) if task.assignee else 'N/A'}]"
+        )
+
     for section, tasks in _group_tasks_by_section(tasks).items():
         if (len(section_id_allowlist) == 0) or (section.gid in section_id_allowlist):
             _print_section_header(section.name)
             for task in tasks:
-                print(f"{_task_link(task)} [{task.assignee.name if task.assignee else 'N/A'}]")
+                _print_task(task)
 
 
 def who(args):
@@ -172,10 +192,28 @@ def board(args):
         _print_tasks(tasks, section_id_allowlist=columns)
 
 
-def init(args) -> None:
+def manage_config(args) -> None:
     """
-    Creates a asa config file based on the choices selected via wizard.
+    Manage the asa configuration file.
     """
     asana = _new_asana_client(args)
 
-    initialise_config(asana=asana, config_file_path=os.path.expanduser(args.config_file))
+    if args.init:
+        print(f"==> Preparing configuration to write to {CONFIG_FILE_PATH}...")
+        initialise_config(asana=asana, config_file_path=os.path.expanduser(CONFIG_FILE_PATH))
+
+    reload_config()
+
+    default_board = get_default_board()
+    default_team = get_default_team()
+    all_boards = get_all_boards()
+    all_teams = get_all_teams()
+
+    _print_table(
+        rows=[
+            (f"{Fore.CYAN}Teams{Fore.RESET}", "\n".join(all_teams)),
+            (f"{Fore.CYAN}Default team{Fore.RESET}", default_team),
+            (f"{Fore.CYAN}Boards{Fore.RESET}", "\n".join(all_boards)),
+            (f"{Fore.CYAN}Default board{Fore.RESET}", default_board),
+        ]
+    )

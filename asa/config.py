@@ -54,6 +54,20 @@ def get_default_board() -> str | None:
     return config["defaults"]["DefaultBoard"] if config.has_section("defaults") else None
 
 
+def get_all_boards() -> List[str]:
+    section_names = config.sections()
+    return [re.sub("^board\\.", "", s) for s in section_names if s.startswith("board.")]
+
+
+def get_all_teams() -> List[str]:
+    section_names = config.sections()
+    return [re.sub("^team\\.", "", s) for s in section_names if s.startswith("team.")]
+
+
+def reload_config():
+    config.read(os.path.expanduser(CONFIG_FILE_PATH))
+
+
 #
 # Id converters
 #
