@@ -3,7 +3,7 @@ import os
 import colorama
 
 from .config import get_workspace, get_default_team, get_default_board
-from .commands import who, workspaces, teams, team, boards, board, me, manage_config
+from .commands import teams, team, boards, board, me, manage_config
 
 colorama.init()
 
@@ -27,9 +27,9 @@ def execute_cli():
     #
     # asa who
     #
-    who_parser = command_parser.add_parser("who", help="Identity the specified current user")
-    who_parser.add_argument("-u", "--user", default="me", help="The user id")
-    who_parser.set_defaults(func=who)
+    # who_parser = command_parser.add_parser("who", help="Identity the specified current user")
+    # who_parser.add_argument("-u", "--user", default="me", help="The user id")
+    # who_parser.set_defaults(func=who)
 
     #
     # asa me
@@ -49,11 +49,11 @@ def execute_cli():
     #
     # asa workspaces
     #
-    workspaces_parser = command_parser.add_parser(
-        "workspaces", help="List workspaces available to the user"
-    )
-    workspaces_parser.add_argument("-u", "--user", default="me", help="The user id")
-    workspaces_parser.set_defaults(func=workspaces)
+    # workspaces_parser = command_parser.add_parser(
+    #     "workspaces", help="List workspaces available to the user"
+    # )
+    # workspaces_parser.add_argument("-u", "--user", default="me", help="The user id")
+    # workspaces_parser.set_defaults(func=workspaces)
 
     #
     # asa teams
