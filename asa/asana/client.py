@@ -17,7 +17,7 @@ from asa.asana.model import (
 )
 
 ASANA_API_BASE = "https://app.asana.com/api/1.0"
-TASKS_QUERY_STRING = "?limit=100&completed_since=now&opt_fields=assignee.name,memberships.section.name,name,assignee_name,projects,workspace,workspace.name,projects.name,permalink_url"
+TASKS_OPT_FIELDS = "assignee.name,memberships.section.name,name,assignee_name,projects,workspace,workspace.name,projects.name,permalink_url"
 
 
 class AsanaClient:
@@ -79,7 +79,9 @@ class AsanaClient:
         return [ProjectCompact.model_validate(p) for p in data]
 
     def get_project_incomplete_tasks(self, *, project_id: str) -> List[Task]:
-        data = self._send_request(f"/projects/{project_id}/tasks{TASKS_QUERY_STRING}")
+        data = self._send_request(
+            f"/projects/{project_id}/tasks?limit=100&completed_since=now&opt_fields={TASKS_OPT_FIELDS}"
+        )
         return [Task.model_validate(t) for t in data]
 
     def get_user_task_list(self, *, workspace: str, user_id: str = "me") -> TaskList:
@@ -87,9 +89,17 @@ class AsanaClient:
         return TaskList.model_validate(data)
 
     def get_user_incomplete_tasks(self, *, task_list_id: str) -> List[Task]:
-        data = self._send_request(f"/user_task_lists/{task_list_id}/tasks{TASKS_QUERY_STRING}")
+        data = self._send_request(
+            f"/user_task_lists/{task_list_id}/tasks?limit=100&completed_since=now&opt_fields={TASKS_OPT_FIELDS}"
+        )
         return [Task.model_validate(t) for t in data]
 
     def get_sections_by_project(self, *, project_id: str) -> List[SectionCompact]:
         data = self._send_request(f"/projects/{project_id}/sections")
         return [SectionCompact.model_validate(s) for s in data]
+
+    def search_tasks(self, *, workspace_id: str, project_id: str, search_text: str) -> List[Task]:
+        data = self._send_request(
+            f"/workspaces/{workspace_id}/tasks/search?text={search_text}&opt_fields={TASKS_OPT_FIELDS}&projects.any={project_id}"
+        )
+        return [Task.model_validate(t) for t in data]

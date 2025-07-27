@@ -188,6 +188,21 @@ def board(args):
         _print_tasks(tasks, section_id_allowlist=columns)
 
 
+def search_tasks(args):
+    """
+    Execute a text search for tasks.
+    """
+    asana = _new_asana_client(args)
+
+    board_id = get_board_config(get_default_board())["Id"]
+
+    tasks = asana.search_tasks(
+        workspace_id=get_workspace(), search_text=args.text, project_id=board_id
+    )
+
+    _print_tasks(tasks)
+
+
 def manage_config(args) -> None:
     """
     Manage the asa configuration file.

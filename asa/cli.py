@@ -3,7 +3,7 @@ import os
 import colorama
 
 from .config import get_workspace, get_default_team, get_default_board
-from .commands import teams, team, boards, board, me, manage_config
+from .commands import teams, team, boards, board, me, manage_config, search_tasks
 
 colorama.init()
 
@@ -109,6 +109,17 @@ def execute_cli():
         help="Open the board in the default browser",
     )
     board_parser.set_defaults(func=board)
+
+    #
+    # asa search
+    #
+    search_parser = command_parser.add_parser("search", help="Search for tasks")
+
+    search_parser.add_argument(
+        "text",
+        help="The text to search for",
+    )
+    search_parser.set_defaults(func=search_tasks)
 
     #
     # asa config
