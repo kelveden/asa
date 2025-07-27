@@ -1,7 +1,6 @@
 import os
 import re
 import webbrowser
-from math import floor, ceil
 from typing import Sequence, Iterable, List, Dict
 
 from asa.asana.client import AsanaClient
@@ -24,9 +23,6 @@ from .config import (
     reload_config,
 )
 
-LINE_SEPARATOR = "-"
-SECTION_SEPARATOR_LENGTH = 60
-
 
 def _new_asana_client(args) -> AsanaClient:
     return AsanaClient(args.token, args.verbose)
@@ -47,47 +43,47 @@ def _print_named_refs(refs: Iterable[NamedRef]):
     _print_table([(ref.gid, ref.name) for ref in refs], headers=["Id", "Name"])
 
 
-def _group_tasks_by_section(tasks: Iterable[Task]) -> Dict[SectionCompact, List[Task]]:
-    accumulated: Dict[SectionCompact, List[Task]] = {}
-
-    for task in tasks:
-        sections = [tm.section for tm in task.memberships if isinstance(tm, Task.SectionMembership)]  # type: ignore
-        for section in sections:
-            if section in accumulated:
-                accumulated[section].append(task)
-            else:
-                accumulated[section] = [task]
-
-    return accumulated
-
-
 def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ()):
+    def _group_tasks_by_section(tasks_: Iterable[Task]) -> Dict[SectionCompact, List[Task]]:
+        accumulated: Dict[SectionCompact, List[Task]] = {}
+
+        for task_ in tasks_:
+            sections = [
+                tm.section for tm in task_.memberships if isinstance(tm, Task.SectionMembership)
+            ]  # type: ignore
+            for section_ in sections:
+                if section_ in accumulated:
+                    accumulated[section_].append(task_)
+                else:
+                    accumulated[section_] = [task_]
+
+        return accumulated
+
     def _task_link(task_: Task):
         # See https://stackoverflow.com/a/71309268
         # OSC 8 ; params ; URI ST <name> OSC 8 ;; ST
         escape_mask = "\033]8;;{}\033\\{}\033]8;;\033\\"
 
-        return escape_mask.format(task.permalink_url, task_.name)
-
-    def _print_section_header(section_name: str):
-        padding_length = (SECTION_SEPARATOR_LENGTH - len(section_name) - 2) / 2
-        print(
-            f"{LINE_SEPARATOR * floor(padding_length)} {section_name} {LINE_SEPARATOR * ceil(padding_length)}"
-        )
+        return escape_mask.format(task_.permalink_url, task_.name)
 
     def _to_initials(name: str):
         return re.sub("[a-z ]", "", name)
 
-    def _print_task(task_: Task):
-        print(
-            f"{_task_link(task)} [{_to_initials(task.assignee.name) if task.assignee else 'N/A'}]"
-        )
+    def _print_section(section_: SectionCompact, tasks_: List[Task]):
+        if (len(section_id_allowlist) == 0) or (section_.gid in section_id_allowlist):
+            _print_table(
+                [
+                    (
+                        _task_link(task_),
+                        _to_initials(task_.assignee.name) if task_.assignee else "N/A",
+                    )
+                    for task_ in tasks_
+                ],
+                [section_.name, "Assignee"],
+            )
 
     for section, tasks in _group_tasks_by_section(tasks).items():
-        if (len(section_id_allowlist) == 0) or (section.gid in section_id_allowlist):
-            _print_section_header(section.name)
-            for task in tasks:
-                _print_task(task)
+        _print_section(section, tasks)
 
 
 def who(args):
