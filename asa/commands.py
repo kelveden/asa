@@ -1,6 +1,5 @@
 import os
 import re
-import webbrowser
 from typing import Sequence, Iterable, List, Dict
 
 from asa.asana.client import AsanaClient
@@ -114,7 +113,7 @@ def me(args):
     task_list = asana.get_user_task_list(workspace=args.workspace, user_id=args.user)
 
     if args.open:
-        webbrowser.open(f"https://app.asana.com/1/{args.workspace}/home", autoraise=True)
+        os.system(f"open https://app.asana.com/1/{args.workspace}/home")
     else:
         task_list_id = task_list.gid
         tasks = asana.get_user_incomplete_tasks(task_list_id=task_list_id)
@@ -177,9 +176,7 @@ def board(args):
 
     if args.open:
         workspace = get_workspace()
-        webbrowser.open(
-            f"https://app.asana.com/1/{workspace}/project/{board_config['Id']}", autoraise=True
-        )
+        os.system(f"open https://app.asana.com/1/{workspace}/project/{board_config['Id']}")
     else:
         tasks = asana.get_project_incomplete_tasks(project_id=board_config["Id"])
         columns_str = board_config.get("Columns", fallback=None)
