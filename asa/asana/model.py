@@ -19,6 +19,7 @@ class NamedRef(BaseModel):
 
     gid: Gid
     name: str
+    permalink_url: Optional[str] = None
 
 
 class Photo(BaseModel):
@@ -156,4 +157,3 @@ class Task(NamedRef):
     memberships: Iterable[ProjectMembership | SectionMembership]
     projects: Iterable[ProjectCompact]
     workspace: WorkspaceCompact
-    permalink_url: str

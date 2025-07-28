@@ -39,7 +39,21 @@ def _print_table(rows: Iterable[Iterable], headers: Sequence[str] = ()):
 
 
 def _print_named_refs(refs: Iterable[NamedRef]):
-    _print_table([(ref.gid, ref.name) for ref in refs], headers=["Id", "Name"])
+    _print_table(
+        [
+            (ref.gid, _to_link(ref.permalink_url, ref.name) if ref.permalink_url else ref.name)
+            for ref in refs
+        ],
+        headers=["Id", "Name"],
+    )
+
+
+def _to_link(url: str, label: str) -> str:
+    # See https://stackoverflow.com/a/71309268
+    # OSC 8 ; params ; URI ST <name> OSC 8 ;; ST
+    escape_mask = "\033]8;;{}\033\\{}\033]8;;\033\\"
+
+    return escape_mask.format(url, label)
 
 
 def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ()):
@@ -58,13 +72,6 @@ def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ())
 
         return accumulated
 
-    def _task_link(task_: Task):
-        # See https://stackoverflow.com/a/71309268
-        # OSC 8 ; params ; URI ST <name> OSC 8 ;; ST
-        escape_mask = "\033]8;;{}\033\\{}\033]8;;\033\\"
-
-        return escape_mask.format(task_.permalink_url, task_.name)
-
     def _to_initials(name: str):
         return re.sub("[a-z ]", "", name)
 
@@ -73,7 +80,7 @@ def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ())
             _print_table(
                 [
                     (
-                        _task_link(task_),
+                        _to_link(str(task_.permalink_url), task_.name),
                         _to_initials(task_.assignee.name) if task_.assignee else "N/A",
                     )
                     for task_ in tasks_
