@@ -8,6 +8,8 @@ Opinionated CLI for [Asana](https://asana.com/).
 > 
 > * [just](https://just.systems/man/en/) - task runner.
 > * [uv](https://docs.astral.sh/uv/) - Python package/project manager.
+> * A [personal access token](https://developers.asana.com/docs/personal-access-token) from Asana. This can be configured as
+>   a `ASANA_TOKEN` environment variable in your shell or passed as an argument to `asa` using the `--token` switch.
 
 1. Install the dependencies and pre-commit hook:
 
