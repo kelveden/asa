@@ -117,14 +117,15 @@ def me(args):
         open: Whether to bypass CLI output and just open the user details page in the browser.
     """
     asana = _new_asana_client(args)
-    task_list = asana.get_user_task_list(workspace=args.workspace, user_id=args.user)
+    task_list = asana.get_user_task_list(workspace=args.workspace, user_id="me")
+
+    task_list_id = task_list.gid
+    tasks = asana.get_user_incomplete_tasks(task_list_id=task_list_id)
 
     if args.open:
-        os.system(f"open https://app.asana.com/1/{args.workspace}/home")
+        for task in tasks:
+            os.system(f"open {task.permalink_url}")
     else:
-        task_list_id = task_list.gid
-        tasks = asana.get_user_incomplete_tasks(task_list_id=task_list_id)
-
         _print_tasks(tasks)
 
 

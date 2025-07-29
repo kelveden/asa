@@ -35,14 +35,13 @@ def execute_cli():
     # asa me
     #
     me_parser = command_parser.add_parser("me", help="Get incomplete tasks for the current user")
-    me_parser.add_argument("-u", "--user", default="me", help="The user id")
     me_parser.add_argument("-w", "--workspace", default=get_workspace(), help="The workspace id")
     me_parser.add_argument(
         "-o",
         "--open",
         action="store_true",
         default=False,
-        help="Open the board in the default browser",
+        help="Open the tasks assigned to the current user in the default browser",
     )
     me_parser.set_defaults(func=me)
 
