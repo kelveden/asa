@@ -118,6 +118,12 @@ def execute_cli():
         "text",
         help="The text to search for",
     )
+    search_parser.add_argument(
+        "-b",
+        "--board",
+        default=get_default_board(),
+        help="The board identifier from the asa configuration to use as the target of the search",
+    )
     search_parser.set_defaults(func=search_tasks)
 
     #

@@ -4,9 +4,6 @@ from typing import Sequence, Iterable, List, Dict
 
 from asa.asana.client import AsanaClient
 from colorama import Fore
-from tabulate import tabulate
-
-from term_image import image  # type: ignore
 
 from .asana.model import NamedRef, Task, SectionCompact
 from .config import (
@@ -27,25 +24,11 @@ def _new_asana_client(args) -> AsanaClient:
     return AsanaClient(args.token, args.verbose)
 
 
-def _print_table(rows: Iterable[Iterable], headers: Sequence[str] = ()):
-    print(
-        tabulate(
-            rows,
-            headers=[f"{Fore.CYAN}{h}{Fore.RESET}" for h in headers],
-            tablefmt="heavy_grid",
-            numalign="left",
-        )
-    )
-
-
 def _print_named_refs(refs: Iterable[NamedRef]):
-    _print_table(
-        [
-            (ref.gid, _to_link(ref.permalink_url, ref.name) if ref.permalink_url else ref.name)
-            for ref in refs
-        ],
-        headers=["Id", "Name"],
-    )
+    for ref in refs:
+        print(
+            f"{ref.gid} {_to_link(ref.permalink_url, ref.name) if ref.permalink_url else ref.name}"
+        )
 
 
 def _to_link(url: str, label: str) -> str:
@@ -73,40 +56,16 @@ def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ())
         return accumulated
 
     def _to_initials(name: str):
-        return re.sub("[a-z ]", "", name)
+        return re.sub("[a-z ]", "", name)[:2]
 
-    def _print_section(section_: SectionCompact, tasks_: List[Task]):
-        if (len(section_id_allowlist) == 0) or (section_.gid in section_id_allowlist):
-            _print_table(
-                [
-                    (
-                        _to_link(str(task_.permalink_url), task_.name),
-                        _to_initials(task_.assignee.name) if task_.assignee else "N/A",
-                    )
-                    for task_ in tasks_
-                ],
-                [section_.name, "Assignee"],
-            )
+    for section, tasks in reversed(list(_group_tasks_by_section(tasks).items())):
+        if (len(section_id_allowlist) == 0) or (section.gid in section_id_allowlist):
+            print(f"{Fore.CYAN}{section.name}{Fore.RESET}")
 
-    for section, tasks in _group_tasks_by_section(tasks).items():
-        _print_section(section, tasks)
-
-
-def who(args):
-    """
-    Prints basic details of the user currently being used for authentication to Asana.
-    """
-    asana = _new_asana_client(args)
-    user = asana.get_user(user_id=args.user)
-
-    _print_table(
-        [
-            [f"{Fore.CYAN}Name:{Fore.RESET} {user.name}"],
-            [f"{Fore.CYAN}Id:{Fore.RESET}   {user.gid}"],
-        ]
-    )
-
-    print(image.from_url(user.photo.image_128x128, width=30))
+            for task_ in tasks:
+                print(
+                    f"  [{_to_initials(task_.assignee.name) if task_.assignee else '--'}] {_to_link(str(task_.permalink_url), task_.name)}"
+                )
 
 
 def me(args):
@@ -199,7 +158,7 @@ def search_tasks(args):
     """
     asana = _new_asana_client(args)
 
-    board_id = get_board_config(get_default_board())["Id"]
+    board_id = get_board_config(args.board)["Id"]
 
     tasks = asana.search_tasks(
         workspace_id=get_workspace(), search_text=args.text, project_id=board_id
@@ -228,11 +187,9 @@ def manage_config(args) -> None:
     all_boards = get_all_boards()
     all_teams = get_all_teams()
 
-    _print_table(
-        rows=[
-            (f"{Fore.CYAN}Teams{Fore.RESET}", "\n".join(all_teams)),
-            (f"{Fore.CYAN}Default team{Fore.RESET}", default_team),
-            (f"{Fore.CYAN}Boards{Fore.RESET}", "\n".join(all_boards)),
-            (f"{Fore.CYAN}Default board{Fore.RESET}", default_board),
-        ]
-    )
+    print(f"{Fore.CYAN}Teams:{Fore.RESET}")
+    for t in all_teams:
+        print(f"  {t}{' [default]' if t == default_team else ''}")
+    print(f"{Fore.CYAN}Boards:{Fore.RESET}")
+    for b in all_boards:
+        print(f"  {b}{' [default]' if b == default_board else ''}")
