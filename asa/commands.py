@@ -5,7 +5,7 @@ from typing import Sequence, Iterable, List, Dict
 from asa.asana.client import AsanaClient
 from colorama import Fore
 
-from .asana.model import NamedRef, Task, SectionCompact
+from .asana.model import Workspace, Task, Section
 from .config import (
     get_board_config,
     to_team_id,
@@ -24,7 +24,7 @@ def _new_asana_client(args) -> AsanaClient:
     return AsanaClient(args.token, args.verbose)
 
 
-def _print_named_refs(refs: Iterable[NamedRef]):
+def _print_named_refs(refs: Iterable[Workspace]):
     for ref in refs:
         print(
             f"{ref.gid} {_to_link(ref.permalink_url, ref.name) if ref.permalink_url else ref.name}"
@@ -40,8 +40,8 @@ def _to_link(url: str, label: str) -> str:
 
 
 def _print_tasks(tasks: List[Task], *, section_id_allowlist: Sequence[str] = ()):
-    def _group_tasks_by_section(tasks_: Iterable[Task]) -> Dict[SectionCompact, List[Task]]:
-        accumulated: Dict[SectionCompact, List[Task]] = {}
+    def _group_tasks_by_section(tasks_: Iterable[Task]) -> Dict[Section, List[Task]]:
+        accumulated: Dict[Section, List[Task]] = {}
 
         for task_ in tasks_:
             sections = [

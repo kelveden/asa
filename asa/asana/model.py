@@ -57,7 +57,7 @@ class User(UserCompact):
     photo: Photo
 
 
-class WorkspaceCompact(NamedRef):
+class Workspace(NamedRef):
     """
     The compact details for a named workspace.
 
@@ -76,10 +76,10 @@ class WorkspaceMembership(BaseModel):
 
     gid: Gid
     user: UserCompact
-    workspace: WorkspaceCompact
+    workspace: Workspace
 
 
-class TeamCompact(NamedRef):
+class Team(NamedRef):
     """
     The compact details for a named team.
 
@@ -98,10 +98,10 @@ class TeamMembership(BaseModel):
 
     gid: Gid
     user: UserCompact
-    team: TeamCompact
+    team: Team
 
 
-class ProjectCompact(NamedRef):
+class Project(NamedRef):
     """
     The compact details for a named project.
 
@@ -129,10 +129,10 @@ class TaskList(NamedRef):
     """
 
     owner: UserCompact
-    workspace: WorkspaceCompact
+    workspace: Workspace
 
 
-class SectionCompact(NamedRef):
+class Section(NamedRef):
     """
     The compact details for a named section
     """
@@ -148,12 +148,12 @@ class Task(NamedRef):
     """
 
     class ProjectMembership(BaseModel):
-        project: ProjectCompact
+        project: Project
 
     class SectionMembership(BaseModel):
-        section: SectionCompact
+        section: Section
 
     assignee: Optional[UserCompact]
     memberships: Iterable[ProjectMembership | SectionMembership]
-    projects: Iterable[ProjectCompact]
-    workspace: WorkspaceCompact
+    projects: Iterable[Project]
+    workspace: Workspace

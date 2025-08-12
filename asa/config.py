@@ -8,7 +8,7 @@ from typing import List
 import questionary
 
 from asa.asana.client import AsanaClient
-from asa.asana.model import NamedRef, WorkspaceMembership
+from asa.asana.model import NamedRef, Workspace, Team, Project, Section
 
 CONFIG_FILE_DIR = "~/.config/asa"
 CONFIG_FILE_PATH = f"{CONFIG_FILE_DIR}/config.ini"
@@ -98,16 +98,19 @@ def initialise_config(*, asana: AsanaClient, config_file_path: str) -> None:
     Creates a asa config file based on the choices selected via wizard.
     """
 
-    def _choose_workspace() -> NamedRef:
-        workspace_memberships = asana.get_workspace_memberships(user_id="me")
-        workspace_membership: WorkspaceMembership = questionary.select(
-            "Which workspace do you want asa to work with?",
-            choices=[questionary.Choice(wm.workspace.name, wm) for wm in workspace_memberships],
+    def _choose_workspace() -> Workspace:
+        workspaces = [wm.workspace for wm in asana.get_workspace_memberships(user_id="me")]
+
+        choices = [questionary.Choice(w.name, w) for w in workspaces]
+        default_choice = next((c for c in choices if c.value == get_workspace()), None)
+
+        workspace_: Workspace = questionary.select(
+            "Which workspace do you want asa to work with?", choices=choices, default=default_choice
         ).ask()
 
-        return workspace_membership.workspace
+        return workspace_
 
-    def _choose_teams(workspace_id: str) -> List[NamedRef]:
+    def _choose_teams(workspace_id: str) -> List[Team]:
         teams = asana.get_teams(workspace=workspace_id, user_id="me")
 
         return questionary.checkbox(
@@ -115,13 +118,13 @@ def initialise_config(*, asana: AsanaClient, config_file_path: str) -> None:
             choices=[questionary.Choice(t.name, t) for t in teams],
         ).ask()
 
-    def _choose_default_team(teams_: List[NamedRef]) -> NamedRef:
+    def _choose_default_team(teams_: List[Team]) -> Team:
         return questionary.select(
             "Which team do you wish to be the default?",
             choices=[questionary.Choice(t.name, t) for t in teams_],
         ).ask()
 
-    def _choose_projects(team: NamedRef) -> List[NamedRef]:
+    def _choose_projects(team: Team) -> List[Project]:
         projects_ = asana.get_projects_by_team(team_id=team.gid)
 
         if len(projects_) > 0:
@@ -132,13 +135,13 @@ def initialise_config(*, asana: AsanaClient, config_file_path: str) -> None:
         else:
             return []
 
-    def _choose_default_board(projects: List[NamedRef]) -> NamedRef:
+    def _choose_default_board(projects: List[Project]) -> Project:
         return questionary.select(
             "Which board do you wish to be the default?",
             choices=[questionary.Choice(p.name, p) for p in projects],
         ).ask()
 
-    def _choose_sections(project: NamedRef) -> List[NamedRef]:
+    def _choose_sections(project: Project) -> List[Section]:
         sections_ = asana.get_sections_by_project(project_id=project.gid)
 
         return questionary.checkbox(
@@ -151,10 +154,10 @@ def initialise_config(*, asana: AsanaClient, config_file_path: str) -> None:
 
     workspace: NamedRef = _choose_workspace()
 
-    selected_teams: List[NamedRef] = _choose_teams(workspace_id=workspace.gid)
+    selected_teams: List[Team] = _choose_teams(workspace_id=workspace.gid)
     default_team: NamedRef = _choose_default_team(selected_teams)
 
-    selected_projects: List[NamedRef] = list(
+    selected_projects: List[Project] = list(
         chain.from_iterable([_choose_projects(t) for t in selected_teams])
     )
     default_board = _choose_default_board(selected_projects)

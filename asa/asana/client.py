@@ -8,12 +8,12 @@ from requests.auth import AuthBase
 from asa.asana.model import (
     User,
     WorkspaceMembership,
-    TeamCompact,
+    Team,
     TeamMembership,
-    ProjectCompact,
+    Project,
     TaskList,
     Task,
-    SectionCompact,
+    Section,
 )
 
 ASANA_API_BASE = "https://app.asana.com/api/1.0"
@@ -71,11 +71,11 @@ class AsanaClient:
         return [WorkspaceMembership.model_validate(wm) for wm in data]
 
     # https://developers.asana.com/reference/getteamsforuser
-    def get_teams(self, *, workspace: str, user_id: str = "me") -> List[TeamCompact]:
+    def get_teams(self, *, workspace: str, user_id: str = "me") -> List[Team]:
         data = self._send_request(
             f"/users/{user_id}/teams?workspace={workspace}&opt_fields={TEAM_OPT_FIELDS}"
         )
-        return [TeamCompact.model_validate(t) for t in data]
+        return [Team.model_validate(t) for t in data]
 
     # https://developers.asana.com/reference/getteammembershipsforteam
     def get_team_members(self, *, team_id: str) -> List[TeamMembership]:
@@ -83,9 +83,9 @@ class AsanaClient:
         return [TeamMembership.model_validate(tm) for tm in data]
 
     # https://developers.asana.com/reference/getprojectsforteam
-    def get_projects_by_team(self, *, team_id: str) -> List[ProjectCompact]:
+    def get_projects_by_team(self, *, team_id: str) -> List[Project]:
         data = self._send_request(f"/teams/{team_id}/projects?opt_fields={PROJECT_OPT_FIELDS}")
-        return [ProjectCompact.model_validate(p) for p in data]
+        return [Project.model_validate(p) for p in data]
 
     # https://developers.asana.com/reference/gettasksforproject
     def get_project_incomplete_tasks(self, *, project_id: str) -> List[Task]:
@@ -107,9 +107,9 @@ class AsanaClient:
         return [Task.model_validate(t) for t in data]
 
     # https://developers.asana.com/reference/getsectionsforproject
-    def get_sections_by_project(self, *, project_id: str) -> List[SectionCompact]:
+    def get_sections_by_project(self, *, project_id: str) -> List[Section]:
         data = self._send_request(f"/projects/{project_id}/sections")
-        return [SectionCompact.model_validate(s) for s in data]
+        return [Section.model_validate(s) for s in data]
 
     # https://developers.asana.com/reference/searchtasksforworkspace
     def search_tasks(self, *, workspace_id: str, project_id: str, search_text: str) -> List[Task]:
