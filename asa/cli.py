@@ -25,13 +25,6 @@ def execute_cli():
     command_parser = parser.add_subparsers(title="commands")
 
     #
-    # asa who
-    #
-    # who_parser = command_parser.add_parser("who", help="Identity the specified current user")
-    # who_parser.add_argument("-u", "--user", default="me", help="The user id")
-    # who_parser.set_defaults(func=who)
-
-    #
     # asa me
     #
     me_parser = command_parser.add_parser("me", help="Get incomplete tasks for the current user")
@@ -44,15 +37,6 @@ def execute_cli():
         help="Open the tasks assigned to the current user in the default browser",
     )
     me_parser.set_defaults(func=me)
-
-    #
-    # asa workspaces
-    #
-    # workspaces_parser = command_parser.add_parser(
-    #     "workspaces", help="List workspaces available to the user"
-    # )
-    # workspaces_parser.add_argument("-u", "--user", default="me", help="The user id")
-    # workspaces_parser.set_defaults(func=workspaces)
 
     #
     # asa teams

@@ -88,17 +88,6 @@ def me(args):
         _print_tasks(tasks)
 
 
-def workspaces(args):
-    """
-    Lists all the workspaces that the user has access to.
-    """
-
-    asana = _new_asana_client(args)
-    workspaces_memberships = asana.get_workspace_memberships(user_id=args.user)
-
-    _print_named_refs([wm.workspace for wm in workspaces_memberships])
-
-
 def teams(args):
     """
     Lists all the teams that the user is on.
